@@ -117,10 +117,12 @@ processFile = function(filepath) {
 
 # ---------------- STATS FILES ------------------
 
-file = "~/cluster_results/results/linear_regression/m5out/system.pc.com_1.device"
+file = "~/cluster_results/store_reset_study/linear_regression/base/m5out/system.pc.com_1.device"
+# file = "~/cluster_results/top_bytes_study/linear_regression/base/m5out/system.pc.com_1.device"
 baseline_out = processFile(file)
 
-file = "~/cluster_results/results_approx_0/linear_regression/m5out/system.pc.com_1.device"
+file = "~/cluster_results/store_reset_study/linear_regression/8/m5out/system.pc.com_1.device"
+# file = "~/cluster_results/top_bytes_study/linear_regression/3/m5out/system.pc.com_1.device"
 approx_out = processFile(file)
 
 print(baseline_out)
@@ -139,5 +141,14 @@ err_vector = c(t(percent_err))
 mean_err = mean(err_vector)
 max_abs_err = max(abs(err_vector))
 
+deviation = (approx_out - baseline_out)
+deviation_vector = c(t(deviation))
+RMSD = sqrt(mean((deviation_vector)^2))
+y_bar = max(baseline_out) - min(baseline_out)
+
+NRMSD = RMSD/y_bar
+NRMSE = NRMSD * 100
+
 cat("Mean Absolute Percent Error: ", mean_err)
 cat("Max Absolute Percent Error: ", max_abs_err)
+cat("NRMSE: ", NRMSE)

@@ -54,20 +54,20 @@ statsFunc <- function(data)
 
 print("Opening data...")
 # file_name <- "~/cluster_results/results/linear_regression/m5out/traffic.csv"
-file_name <- "~/cluster_results/results/pca/m5out/traffic.csv"
+# file_name <- "~/cluster_results/approx_coherence_results/histo/base/m5out/traffic_misses.csv"
 # file_name <- "~/cluster_results/results/histogram/m5out/traffic.csv"
 # file_name <- "~/cluster_results/results/kmeans/m5out/traffic.csv"
 # file_name <- "~/cluster_results/results/matrix_multiply/m5out/traffic.csv"
-# file_name <- "~/cluster_results/results/bodytrack/m5out/traffic_misses.csv"
+file_name <- "~/cluster_results/npb_test/lu/base/m5out/traffic_misses.csv"
 # file_name <- "traffic.csv"
 traffic_data = read.csv(file_name)
 
 # file_name <- "~/cluster_results/results/linear_regression/m5out/value_similarity.csv"
- file_name <- "~/cluster_results/results/pca/m5out/value_similarity.csv"
+# file_name <- "~/cluster_results/approx_coherence_results/histo/base/m5out/value_similarity_misses.csv"
 # file_name <- "~/cluster_results/results/histogram/m5out/value_similarity.csv"
 # file_name <- "~/cluster_results/results/kmeans/m5out/value_similarity.csv"
 # file_name <- "~/cluster_results/results/matrix_multiply/m5out/value_similarity.csv"
-# file_name <- "~/cluster_results/results/bodytrack/m5out/value_similarity_misses.csv"
+file_name <- "~/cluster_results/npb_test/lu/base/m5out/value_similarity_misses.csv"
 # file_name <- "value_similarity.csv"
 val_sim_data = read.csv(file_name)
 
@@ -89,32 +89,32 @@ val_sim_data = val_sim
 
 
 # traffic reduction
-total_misses = sum(val_sim_data$count)
-print(total_misses)
-
-num_1 = sum(val_sim_data[which(val_sim_data$realtive_difference < 1 & val_sim_data$realtive_difference > -1),]$count)
-num_5 = sum(val_sim_data[which(val_sim_data$realtive_difference < 5 & val_sim_data$realtive_difference > -5),]$count)
-num_10 = sum(val_sim_data[which(val_sim_data$realtive_difference < 10 & val_sim_data$realtive_difference > -10),]$count)
-num_20 = sum(val_sim_data[which(val_sim_data$realtive_difference < 20 & val_sim_data$realtive_difference > -20),]$count)
-num_30 = sum(val_sim_data[which(val_sim_data$realtive_difference < 30 & val_sim_data$realtive_difference > -30),]$count)
-num_40 = sum(val_sim_data[which(val_sim_data$realtive_difference < 40 & val_sim_data$realtive_difference > -40),]$count)
-num_50 = sum(val_sim_data[which(val_sim_data$realtive_difference < 50 & val_sim_data$realtive_difference > -50),]$count)
-
-reduction_1 = (num_1)/total_misses * 100
-reduction_5 = (num_5)/total_misses * 100
-reduction_10 = (num_10)/total_misses * 100
-reduction_20 = (num_20)/total_misses * 100
-reduction_30 = (num_30)/total_misses * 100
-reduction_40 = (num_40)/total_misses * 100
-reduction_50 = (num_50)/total_misses * 100
-
-print(paste("1%", reduction_1))
-print(paste("5%", reduction_5))
-print(paste("10%", reduction_10))
-print(paste("20%", reduction_20))
-print(paste("30%", reduction_30))
-print(paste("40%", reduction_40))
-print(paste("50%", reduction_50))
+# total_misses = sum(val_sim_data$count)
+# print(total_misses)
+# 
+# num_1 = sum(val_sim_data[which(val_sim_data$realtive_difference < 1 & val_sim_data$realtive_difference > -1),]$count)
+# num_5 = sum(val_sim_data[which(val_sim_data$realtive_difference < 5 & val_sim_data$realtive_difference > -5),]$count)
+# num_10 = sum(val_sim_data[which(val_sim_data$realtive_difference < 10 & val_sim_data$realtive_difference > -10),]$count)
+# num_20 = sum(val_sim_data[which(val_sim_data$realtive_difference < 20 & val_sim_data$realtive_difference > -20),]$count)
+# num_30 = sum(val_sim_data[which(val_sim_data$realtive_difference < 30 & val_sim_data$realtive_difference > -30),]$count)
+# num_40 = sum(val_sim_data[which(val_sim_data$realtive_difference < 40 & val_sim_data$realtive_difference > -40),]$count)
+# num_50 = sum(val_sim_data[which(val_sim_data$realtive_difference < 50 & val_sim_data$realtive_difference > -50),]$count)
+# 
+# reduction_1 = (num_1)/total_misses * 100
+# reduction_5 = (num_5)/total_misses * 100
+# reduction_10 = (num_10)/total_misses * 100
+# reduction_20 = (num_20)/total_misses * 100
+# reduction_30 = (num_30)/total_misses * 100
+# reduction_40 = (num_40)/total_misses * 100
+# reduction_50 = (num_50)/total_misses * 100
+# 
+# print(paste("1%", reduction_1))
+# print(paste("5%", reduction_5))
+# print(paste("10%", reduction_10))
+# print(paste("20%", reduction_20))
+# print(paste("30%", reduction_30))
+# print(paste("40%", reduction_40))
+# print(paste("50%", reduction_50))
 
 
 

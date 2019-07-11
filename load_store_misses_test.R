@@ -152,7 +152,9 @@ normalizeTo = function(data, reference) {
   return(dframe)
 }
 
-benchmark_names = c("histo", "mri-gridding", "mri-q", "sgemm", "spmv", "stencil", "tpacf")
+# benchmark_names = c("2", "3", "4", "5", "8")
+# benchmark_names = c("adi", "conv-2d", "conv-3d", "fdtd-2d", "fdtd-apml", "jacobi-1d", "jacobi-2d", "seidel-2d")
+benchmark_names = c("adi", "conv-3d", "fdtd-apml", "jacobi-2d", "seidel-2d")
 
 # Summed data from stats file
 all_benchmarks = data.frame(
@@ -172,34 +174,58 @@ all_benchmarks = data.frame(
 # cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 cbPalette <- c("#999999", "#333333", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-
-file = "~/cluster_results/results_parboil/histo/m5out/stats.txt"
+file = "~/cluster_results/store_reset_study/adi/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/mri-gridding/m5out/stats.txt"
+# file = "~/cluster_results/store_reset_study/conv-2d/base/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+
+file = "~/cluster_results/store_reset_study/conv-3d/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/mri-q/m5out/stats.txt"
+# file = "~/cluster_results/store_reset_study/fdtd-2d/base/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+
+file = "~/cluster_results/store_reset_study/fdtd-apml/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/sgemm/m5out/stats.txt"
+# file = "~/cluster_results/store_reset_study/jacobi-1d/base/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+
+file = "~/cluster_results/store_reset_study/jacobi-2d/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/spmv/m5out/stats.txt"
+file = "~/cluster_results/store_reset_study/seidel-2d/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/stencil/m5out/stats.txt"
-file_data = processFile(file)
-all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/tpacf/m5out/stats.txt"
-file_data = processFile(file)
-all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+# file = "~/cluster_results/sweep_store_reset_counter/2/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+# 
+# file = "~/cluster_results/sweep_store_reset_counter/3/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+# 
+# file = "~/cluster_results/sweep_store_reset_counter/4/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+# 
+# file = "~/cluster_results/sweep_store_reset_counter/5/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+# 
+# file = "~/cluster_results/sweep_store_reset_counter/8/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
 print(all_benchmarks)
 
@@ -306,6 +332,6 @@ plot9 <- ggplot() +
   ylim(c(0,1.00))
 
 plot9
-pdf("coherence_misses_L1.pdf", width=8, height=3)
+# pdf("coherence_misses_L1.pdf", width=8, height=3)
 print(plot9)
-dev.off()
+# dev.off()

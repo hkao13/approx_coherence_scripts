@@ -57,7 +57,7 @@ processFile = function(filepath) {
 
 # ---------------- STATS FILES ------------------
 # file = "~/gem5-nej/m5out/stats.txt"
-file = "~/cluster_results/results/linear_regression/m5out/stats.txt"
+file = "~/cluster_results/approx_coherence_results/mri-gridding/base/m5out/stats.txt"
 data = processFile(file)
 
 
@@ -103,6 +103,8 @@ data = data[order(-data$count),]
 data$percent <- format(round(data$percent,2), nsmall = 2)
 
 print(data)
+
+print(sum(data$count))
 
 write.csv(data, file = "L2_coherence.csv", row.names=FALSE)
 

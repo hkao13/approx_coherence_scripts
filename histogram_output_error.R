@@ -66,10 +66,10 @@ processFile = function(filepath) {
 
 # ---------------- STATS FILES ------------------
 
-file = "~/cluster_results/results/histogram/m5out/system.pc.com_1.device"
+file = "~/cluster_results/store_reset_study/histogram/base/m5out/system.pc.com_1.device"
 baseline_out = processFile(file)
 
-file = "~/cluster_results/results/histogram/m5out/system.pc.com_1.device"
+file = "~/cluster_results/store_reset_study/histogram/8/m5out/system.pc.com_1.device"
 approx_out = processFile(file)
 
 # Both histogram output should have 256*3 = 768 output values
@@ -82,8 +82,16 @@ percent_err[is.na(percent_err)] = 0
 err_vector = c(t(percent_err))
 
 mean_err = mean(err_vector)
-
 max_abs_err = max(abs(err_vector))
+
+deviation = (approx_out - baseline_out)
+deviation_vector = c(t(deviation))
+RMSD = sqrt(mean((deviation_vector)^2))
+y_bar = max(baseline_out) - min(baseline_out)
+
+NRMSD = RMSD/y_bar
+NRMSE = NRMSD * 100
 
 cat("Mean Absolute Percent Error: ", mean_err)
 cat("Max Absolute Percent Error: ", max_abs_err)
+cat("NRMSE: ", NRMSE)

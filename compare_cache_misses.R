@@ -152,7 +152,10 @@ normalizeTo = function(data, reference) {
   return(dframe)
 }
 
-benchmark_names = c("histo", "mri-gridding", "mri-q", "sgemm", "spmv", "stencil", "tpacf")
+# benchmark_names = c("lin_reg", "kmeans", "histogram", "pca", "mat_mul")
+# benchmark_names = c("lin_reg", "kmeans", "histogram", "pca", "mat_mul", "histo", "mri-grid", "mri-q", "sgemm", "spmv", "stencil", "tpacf", "cg", "ft", "lu", "mg")
+benchmark_names = c("hist", "linear", "pca", "adi", "conv", "fdtd", "jacobi", "seidel")
+# benchmark_names = c("lin_reg")
 
 # Summed data from stats file
 all_benchmarks = data.frame(
@@ -173,34 +176,59 @@ all_benchmarks = data.frame(
 cbPalette <- c("#999999", "#333333", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 
-file = "~/cluster_results/results_parboil/histo/m5out/stats.txt"
+
+
+# file = "~/cluster_results/oracle_study/kmeans/base/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+
+file = "~/cluster_results/store_reset_study_hammer/histogram/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/mri-gridding/m5out/stats.txt"
+file = "~/cluster_results/store_reset_study_hammer/linear_regression/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/mri-q/m5out/stats.txt"
+file = "~/cluster_results/store_reset_study_hammer/pca/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/sgemm/m5out/stats.txt"
+# file = "~/cluster_results/oracle_study/matrix_multiply/base/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+
+file = "~/cluster_results/store_reset_study_hammer/adi/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/spmv/m5out/stats.txt"
+# file = "~/cluster_results/store_reset_study_hammer/conv-2d/base/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+
+file = "~/cluster_results/store_reset_study_hammer/conv-3d/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/stencil/m5out/stats.txt"
+# file = "~/cluster_results/store_reset_study_hammer/fdtd-2d/base/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+
+file = "~/cluster_results/store_reset_study_hammer/fdtd-apml/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
-file = "~/cluster_results/results_parboil/tpacf/m5out/stats.txt"
+# file = "~/cluster_results/store_reset_study_hammer/jacobi-1d/base/m5out/stats.txt"
+# file_data = processFile(file)
+# all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
+
+file = "~/cluster_results/store_reset_study_hammer/jacobi-2d/base/m5out/stats.txt"
 file_data = processFile(file)
 all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 
+file = "~/cluster_results/store_reset_study_hammer/seidel-2d/base/m5out/stats.txt"
+file_data = processFile(file)
+all_benchmarks[nrow(all_benchmarks) + 1,] = file_data
 print(all_benchmarks)
 
 
@@ -279,33 +307,48 @@ plot2
 
 # Plot read and write misses normalized to all demand misses
 all_benchmarks_frac = normalizeTo(all_benchmarks, all_benchmarks$demand_misses)
-data_subset = subset(all_benchmarks_frac, select=c("write_misses_coherence", "read_misses_coherence"))
+data_subset = subset(all_benchmarks_frac, select=c("read_misses_coherence", "write_misses_coherence"))
 # Reshape to get into stacked bar form
 data_subset$benchmarks <- benchmark_names 
 
 data_reshape = melt(data_subset, id.vars = "benchmarks")
 
+
+# Calculate the Average
+benchmarks = c(rep("avg",2))
+
+
+variable = c("read_misses_coherence", "write_misses_coherence")
+value = c(
+  mean(data_reshape$value[data_reshape$variable == "read_misses_coherence"]),
+  mean(data_reshape$value[data_reshape$variable == "write_misses_coherence"])
+)
+avg_data = data.frame(benchmarks, variable, value)
+data_reshape = rbind(data_reshape, avg_data)
+
+data_reshape$benchmarks = factor(data_reshape$benchmarks, levels = data_reshape$benchmarks)
+
 plot9 <- ggplot() + 
   geom_bar(aes(y=value, x=benchmarks, fill=variable), data=data_reshape,
            stat="identity", color="black", width=0.5) +
   theme_bw() +
-  ylab("Normalized L1-d Coherence Cache Misses") +
+  ylab("Fraction of L1-d\nCoherence Misses") +
   xlab("Benchmarks") +
   theme(
     legend.title = element_blank(),
     legend.position = "top",
-    legend.text=element_text(size=11),
-    axis.title.x = element_text(size=11),
-    axis.title.y = element_text(size=11),
-    axis.text.x  = element_text(angle=30, vjust=0.6, size=11),
-    axis.text.y  = element_text(size=11)
+    legend.text=element_text(size=22),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(size=22),
+    axis.text.x  = element_text(angle=90, hjust=1,vjust=0.2, size=22),
+    axis.text.y  = element_text(size=22),
+    panel.grid.major.y = element_line(colour = "black"),
+    panel.grid.major.x = element_blank()
   ) +
-  scale_fill_manual(
-    values=cbPalette,
-    labels=c(" store miss ", " load miss ")) +
+  scale_fill_brewer(palette = "Blues", labels=c(" load miss ", " store miss ")) +
   ylim(c(0,1.00))
-
+                    
 plot9
-pdf("coherence_misses_L1.pdf", width=8, height=3)
+pdf("coherence_misses_L1.pdf", width=9, height=4.5)
 print(plot9)
 dev.off()

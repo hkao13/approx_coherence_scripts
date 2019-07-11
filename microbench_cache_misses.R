@@ -1,23 +1,10 @@
 library(ggplot2)
 library(reshape2)
 
-sumData = function(data) {
-  dframe = data.frame(
-    total_misses=sum(data$total_misses),
-    demand_misses=sum(data$demand_misses),
-    demand_accesses=sum(data$demand_accesses),
-    read_hits=sum(data$read_hits),
-    read_misses=sum(data$read_misses),
-    read_misses_coherence=sum(data$read_misses_coherence)
-  )
-  #print(dframe)
-  return(dframe)
-}
-
-
 processFile = function(filepath) {
   con = file(filepath, "r")
   
+  sim_seconds = 0
   ticks = c()
   
   demand_hits = c()
@@ -43,7 +30,17 @@ processFile = function(filepath) {
   l2_write_misses = c()
   
   mem_reads = c()
+  mem_read_bytes = c()
+  mem_read_bw = c()
   mem_writes = c()
+  mem_write_bytes = c()
+  mem_write_bw = c()
+  
+  l1_data = c()
+  l1_exclusive_data = c()
+  
+  writeback_clean_data = c()
+  writeback_dirty_data = c()
   
   while ( TRUE ) {
     line = readLines(con, n = 1)
@@ -53,8 +50,15 @@ processFile = function(filepath) {
     
     if (grepl(".*End Simulation Statistics.*", line))
     {
-      print(line)
+      # print(line)
       break
+    }
+    
+    if (grepl(".*sim_seconds.*", line))
+    {
+      # print(line)
+      matches <- regmatches(line, gregexpr("([0-9]*\\.[0-9]+|[0-9]+)", line))
+      sim_seconds = as.numeric(unlist(matches))[1]
     }
     
     if (grepl(".*mem_ctrls[0-9]+\\.num_reads::total.*", line)) {
@@ -62,7 +66,23 @@ processFile = function(filepath) {
       matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
       miss = as.numeric(unlist(matches))[2]
       mem_reads = c(mem_reads, miss)
-       # print(miss)
+      # print(miss)
+    }
+    
+    if (grepl(".*mem_ctrls[0-9]+\\.bytes_read::total.*", line)) {
+      # print(line)
+      matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
+      bytes = as.numeric(unlist(matches))[2]
+      mem_read_bytes = c(mem_read_bytes, bytes)
+      # print(miss)
+    }
+    
+    if (grepl(".*mem_ctrls[0-9]+\\.bw_read::total.*", line)) {
+      # print(line)
+      matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
+      bw = as.numeric(unlist(matches))[2]
+      mem_read_bw = c(mem_read_bw, bw)
+      # print(miss)
     }
     
     if (grepl(".*mem_ctrls[0-9]+\\.num_writes::total.*", line)) {
@@ -72,6 +92,24 @@ processFile = function(filepath) {
       mem_writes = c(mem_writes, miss)
       # print(miss)
     }
+    
+    if (grepl(".*mem_ctrls[0-9]+\\.bytes_written::total.*", line)) {
+      # print(line)
+      matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
+      bytes = as.numeric(unlist(matches))[2]
+      mem_write_bytes = c(mem_write_bytes, bytes)
+      # print(miss)
+    }
+    
+    if (grepl(".*mem_ctrls[0-9]+\\.bw_write::total.*", line)) {
+      # print(line)
+      matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
+      bw = as.numeric(unlist(matches))[2]
+      mem_write_bw = c(mem_write_bw, bw)
+      # print(miss)
+    }
+    
+    
     
     if (grepl("^sim_ticks.*", line)) {
       # print(line)
@@ -166,7 +204,7 @@ processFile = function(filepath) {
     
     
     if (grepl(".*l2_cntrl[0-9]+\\.L2cache.demand_hits.*", line)) {
-       # print(line)
+      # print(line)
       matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
       miss = as.numeric(unlist(matches))[4]
       l2_demand_hits = c(l2_demand_hits, miss)
@@ -190,19 +228,19 @@ processFile = function(filepath) {
     }
     
     if (grepl(".*l2_cntrl[0-9]+\\.L2cache.read_hits\\s.*", line)) {
-       # print(line)
+      # print(line)
       matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
       miss = as.numeric(unlist(matches))[4]
       l2_read_hits = c(l2_read_hits, miss)
-       # print(miss)
+      # print(miss)
     }
     
     if (grepl(".*l2_cntrl[0-9]+\\.L2cache.read_misses\\s.*", line)) {
-       # print(line)
+      # print(line)
       matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
       miss = as.numeric(unlist(matches))[4]
       l2_read_misses = c(l2_read_misses, miss)
-       # print(miss)
+      # print(miss)
     }
     
     if (grepl(".*l2_cntrl[0-9]+\\.L2cache.write_hits\\s.*", line)) {
@@ -222,12 +260,38 @@ processFile = function(filepath) {
     }
     
     
+    if (grepl(".*system.ruby.L1Cache_Controller.Data::total\\s.*", line)) {
+      # print(line)
+      matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
+      val = as.numeric(unlist(matches))[2]
+      l1_data = c(l1_data, val)
+    }
     
+    if (grepl(".*system.ruby.L1Cache_Controller.Exclusive_Data::total\\s.*", line)) {
+      # print(line)
+      matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
+      val = as.numeric(unlist(matches))[2]
+      l1_exclusive_data = c(l1_exclusive_data, val)
+    } 
     
+    if (grepl(".*system.ruby.L2Cache_Controller.L1_WBCLEANDATA\\s.*", line)) {
+      # print(line)
+      matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
+      val = as.numeric(unlist(matches))[3]
+      writeback_clean_data = c(writeback_clean_data, val)
+    } 
+    
+    if (grepl(".*system.ruby.L2Cache_Controller.L1_WBDIRTYDATA\\s.*", line)) {
+      # print(line)
+      matches <- regmatches(line, gregexpr("[[:digit:]]+", line))
+      val = as.numeric(unlist(matches))[3]
+      writeback_dirty_data = c(writeback_dirty_data, val)
+    }
     
   }
   
   dframe = data.frame(
+    sim_seconds = sim_seconds,
     ticks=sum(ticks),
     demand_hits=sum(demand_hits),
     demand_misses=sum(demand_misses),
@@ -251,7 +315,14 @@ processFile = function(filepath) {
     l2_write_misses=sum(l2_write_misses),
     
     mem_reads = sum(mem_reads),
-    mem_writes = sum(mem_writes)
+    mem_read_bytes = sum(mem_read_bytes),
+    mem_read_bw = sum(mem_read_bw),
+    mem_writes = sum(mem_writes),
+    mem_write_bytes = sum(mem_write_bytes),
+    mem_write_bw = sum(mem_write_bw),
+    
+    l1_data = sum(l1_data) + sum(l1_exclusive_data),
+    writeback_data = sum(writeback_clean_data) + sum(writeback_dirty_data)
   )
   
   close(con)
@@ -260,78 +331,52 @@ processFile = function(filepath) {
   return(dframe)
 }
 
-normalizeTo = function(data, reference) {
-  dframe = data.frame(
-    demand_hits=data$demand_hits/reference,
-    demand_misses=data$demand_misses/reference,
-    demand_accesses=data$demand_accesses/reference,
-    read_hits=data$read_hits/reference,
-    read_misses=data$read_misses/reference,
-    read_misses_coherence=data$read_misses_coherence/reference,
-    
-    write_hits=data$write_hits/reference,
-    write_hits_approx=data$write_hits_approx/reference,
-    write_misses=data$write_misses/reference,
-    write_misses_coherence=data$write_misses_coherence/reference
-  )
-  return(dframe)
+
+
+
+process_stats = function(benchmark_name, baseline_data, approx_data, source_name)
+{
+  
+  print(approx_data/baseline_data)
+  
+  
 }
 
-
-# ----------- CACTI POWER VALUES --------------------
-
-# These values are in nJ
-l1_read_energy = 0.0338659
-l1_write_energy = 0.0333791
-
-l2_read_energy =  0.200211
-l2_write_energy = 0.216801
-
-
 # ---------------- STATS FILES ------------------
-file = "~/cluster_results/approx_coherence_results/mri-gridding/base/m5out/stats.txt"
-baseline_data = processFile(file)
 
-file = "~/cluster_results/approx_coherence_results/mri-gridding/100/m5out/stats.txt"
-approx_data = processFile(file)
+path = "~/gem5-nej"
 
-print(baseline_data)
-print(approx_data)
-print(approx_data / baseline_data)
+benchmark_names = c("")
 
+all_data=data.frame(benchmark = c(),
+                    source = c(),
+                    saved = c()
+)
 
-# ---------- COMPUTE SPEEDUP ---------
-# speedup = exec time old / exec time new
-speedup = (baseline_data$ticks/approx_data$ticks - 1)*100
+for (benchmark in benchmark_names)
+{
+  
+  cat("Processing Benchmark: ", benchmark, "\n")
+  
+  baseline_file = paste(benchmark, "m5out/8.txt", sep="/")
+  file = paste(path, baseline_file, sep="/")
+  baseline_data = processFile(file)
+  
+  data = process_stats(benchmark, baseline_data, baseline_data, "Base")
+  # all_data = rbind(all_data, data)
+  
+  # -----------------------------------------------
 
-cat("Baseline cycles: ", baseline_data$ticks)
-cat("Enhanced cycles: ", approx_data$ticks)
-cat("Speedup (%): ", speedup)
+  approx_file = paste(benchmark, "/m5out/100.txt", sep="/")
+  file = paste(path, approx_file, sep="/")
+  approx_data = processFile(file)
 
-# --------- COMPUTE ENERGY -----------
+  data = process_stats(benchmark, baseline_data, approx_data, "SR2")
+  # all_data = rbind(all_data, data)
 
-l1_energy_baseline = (baseline_data$read_hits + baseline_data$read_misses) * (l1_read_energy) + 
-  (baseline_data$write_hits + baseline_data$write_hits_approx + baseline_data$write_misses) * (l1_write_energy)
-# l2 energy is wrong right now. Update once the benchmarks finish with the read/write stats
-l2_energy_baseline = (baseline_data$l2_read_hits + baseline_data$l2_read_misses) * (l2_read_energy) + 
-  (baseline_data$l2_write_hits + baseline_data$l2_write_misses) * (l2_write_energy)
+  # -----------------------------------------------
 
-baseline_energy_total = l1_energy_baseline + l2_energy_baseline
-baseline_energy_total
-
-l1_energy_approx = (approx_data$read_hits + approx_data$read_misses) * (l1_read_energy) + 
-  (approx_data$write_hits + approx_data$write_hits_approx + approx_data$write_misses) * (l1_write_energy)
-# l2 energy is wrong right now. Update once the benchmarks finish with the read/write stats
-l2_energy_approx = (approx_data$l2_read_hits + approx_data$l2_read_misses) * (l2_read_energy) + 
-  (approx_data$l2_write_hits + approx_data$l2_write_misses) * (l2_write_energy)
-
-approx_energy_total = l1_energy_approx + l2_energy_approx
-approx_energy_total
-
-energy_reduction = (1 - approx_energy_total/baseline_energy_total)*100
-
-cat("Energy Reduction (%): ", energy_reduction)
-
-
-
+  
+  
+}
 
